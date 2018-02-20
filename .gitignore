@@ -1,3 +1,11 @@
 *.pyc
 */.*checkpoints*.ipynb
+*.rpy
+*.log
+*.msg
+*.prt
+*.sim
+*.sta
+*.dat
+*.odb
 
