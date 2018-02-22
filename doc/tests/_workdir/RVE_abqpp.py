@@ -48,8 +48,10 @@ if job_completed:
                 for n in  odb.rootAssembly.instances["ISAMPLE"].elementSets["ALL"].elements])
   volumeName = volume.name
   session.xyDataObjects.changeKey(volumeName, 'volume')
+ 
   # 2: Other history outputs
   control_node = [n.label for n in  odb.rootAssembly.instances["ISAMPLE"].nodeSets["CONTROL"].nodes][0]
+  pinned_node = [n.label for n in  odb.rootAssembly.instances["ISAMPLE"].nodeSets["PINNED"].nodes][0]
   histDict = {
               "Wtot": "External work: ALLWK for Whole Model",
               "Wp"  : "Plastic dissipation: ALLPD for Whole Model",
@@ -63,6 +65,12 @@ if job_completed:
               "U1"  : "Spatial displacement: U1 at Node {0} in NSET CONTROL".format(control_node),
               "U2"  : "Spatial displacement: U2 at Node {0} in NSET CONTROL".format(control_node),
               "U3"  : "Spatial displacement: U3 at Node {0} in NSET CONTROL".format(control_node),
+              "PINNED_COOR1"  : "Coordinates: COOR1 at Node {0} in NSET PINNED".format(pinned_node),
+              "PINNED_COOR2"  : "Coordinates: COOR2 at Node {0} in NSET PINNED".format(pinned_node),
+              "PINNED_COOR3"  : "Coordinates: COOR3 at Node {0} in NSET PINNED".format(pinned_node),
+              "CONTROL_COOR1"  : "Coordinates: COOR1 at Node {0} in NSET CONTROL".format(control_node),
+              "CONTROL_COOR2"  : "Coordinates: COOR2 at Node {0} in NSET CONTROL".format(control_node),
+              "CONTROL_COOR3"  : "Coordinates: COOR3 at Node {0} in NSET CONTROL".format(control_node),
              }
   
   histData = [session.XYDataFromHistory(
@@ -73,7 +81,7 @@ if job_completed:
           for key, value in histDict.iteritems()] 
  
   session.writeXYReport(fileName="reports/" + simName + "_hist.hrpt", 
-                        xyData = histData)
+                        xyData = histData + [session.xyDataObjects['volume']] )
 
  
 

@@ -1,0 +1,29 @@
+# -*- coding: mbcs -*-
+#
+# Abaqus/Viewer Release 6.13-1 replay file
+# Internal Version: 2013_05_16-01.56.28 126354
+# Run by lcharleux on Thu Feb 22 21:48:11 2018
+#
+
+# from driverUtils import executeOnCaeGraphicsStartup
+# executeOnCaeGraphicsStartup()
+#: Executing "onCaeGraphicsStartup()" in the site directory ...
+from abaqus import *
+from abaqusConstants import *
+session.Viewport(name='Viewport: 1', origin=(1.36719, 1.36719), width=201.25, 
+    height=135.625)
+session.viewports['Viewport: 1'].makeCurrent()
+from driverUtils import executeOnCaeStartup
+executeOnCaeStartup()
+execfile('RVE_abqpp.py', __main__.__dict__)
+#: Failed ot import python dedicated part side of Argiope
+#: Model: /home/lcharleux/Documents/Programmation/Python/Modules/compmod2/doc/tests/_workdir/RVE.odb
+#: Number of Assemblies:         1
+#: Number of Assembly instances: 0
+#: Number of Part instances:     1
+#: Number of Meshes:             1
+#: Number of Element Sets:       1002
+#: Number of Node Sets:          20
+#: Number of Steps:              3
+print 'RT script done'
+#: RT script done

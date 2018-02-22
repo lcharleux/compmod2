@@ -67,7 +67,7 @@ class RVETest(argiope.models.Model, argiope.utils.Container):
     n[("sets", "pinned")]    = n.sets.left & n.sets.bottom & n.sets.back  
     
     control_node = n.index.max() + 1
-    m.nodes.loc[control_node, [("coords")]] = xm * 1.1, ym * 1.1, zm * 1.1
+    m.nodes.loc[control_node, [("coords")]] = xm, ym, zm
     m.nodes.loc[control_node,"sets"] = False
     m.nodes[("sets", "control")] = False
     m.nodes.loc[control_node, ("sets", "control")] = True
@@ -146,37 +146,72 @@ class RVETest(argiope.models.Model, argiope.utils.Container):
     Writes the prosproc scripts for the chosen solver.
     """
     if self.solver == "abaqus":
-      hardness.postproc.indentation_abqpostproc(
-          path = "{0}/{1}_abqpp.py".format(
-              self.workdir,
-              self.label),
-          label = self.label,    
-          solver= self.solver)
+      pattern = Template(
+          open(MODPATH + "/templates/models/RVETest/abqpostproc.py").read())
+      pattern = pattern.substitute(label = self.label)
+      path = "{0}/{1}_abqpp.py".format(self.workdir, self.label)
+      open(path, "w").write(pattern)
   
   def postproc(self):
-     """
-     Runs the whole post proc.
-     """
-     self.write_postproc()
-     self.run_postproc()
-     #HISTORY OUTPUTS
-     hist_path = self.workdir + "/reports/{0}_hist.hrpt".format(self.label)
-     if os.path.isfile(hist_path):
-       hist = argiope.abq.pypostproc.read_history_report(
+    """
+    Runs the whole post proc.
+    """
+    self.write_postproc()
+    self.run_postproc()
+    #HISTORY OUTPUTS
+    hist_path = self.workdir + "/reports/{0}_hist.hrpt".format(self.label)
+    if os.path.isfile(hist_path):
+      data = argiope.abq.pypostproc.read_history_report(
             hist_path, steps = self.steps, x_name = "t") 
-       hist["F"] = hist.CF + hist.RF
-       self.data["history"] = hist
-     # FIELD OUTPUTS
-     files = os.listdir(self.workdir + "reports/")
-     files = [f for f in files if f.endswith(".frpt")]
-     files.sort()
-     for path in files:
-       field = argiope.abq.pypostproc.read_field_report(
-                           self.workdir + "reports/" + path)
-       if field.part == "I_SAMPLE":
-         self.parts["sample"].mesh.fields.append(field)
-       if field.part == "I_INDENTER":
-         self.parts["indenter"].mesh.fields.append(field)
+      data2 = pd.DataFrame()
+      data2[("time", "t")] = data.t
+      data2[("step", "s")] = data.step
+      # CF
+      data2[("forces", "CF1")] = data.Cf1
+      data2[("forces", "CF2")] = data.Cf2
+      data2[("forces", "CF3")] = data.Cf3
+      # RF
+      data2[("forces", "RF1")] = data.Rf1
+      data2[("forces", "RF2")] = data.Rf2
+      data2[("forces", "RF3")] = data.Rf3
+      # U
+      data2[("disp", "U1")] = data.U1
+      data2[("disp", "U2")] = data.U2
+      data2[("disp", "U3")] = data.U3
+      # Volume
+      data2[("volume", "V")] = data.volume
+      # Dimensions
+      data2[("dimensions", "L1")] = data.CONTROL_COOR1 - data.PINNED_COOR1
+      data2[("dimensions", "L2")] = data.CONTROL_COOR2 - data.PINNED_COOR2
+      data2[("dimensions", "L3")] = data.CONTROL_COOR3 - data.PINNED_COOR3
+      # Multi indexing
+      data2.columns = pd.MultiIndex.from_tuples(data2.columns)
+      # Cross sections
+      data2[("areas", "A1")] = data2.volume.V / data2.dimensions.L1
+      data2[("areas", "A2")] = data2.volume.V / data2.dimensions.L2
+      data2[("areas", "A3")] = data2.volume.V / data2.dimensions.L3
+      # Forces
+      data2[("forces", "F1")] = data2.forces.CF1 + data2.forces.RF1
+      data2[("forces", "F2")] = data2.forces.CF2 + data2.forces.RF2
+      data2[("forces", "F3")] = data2.forces.CF3 + data2.forces.RF3
+      # Stresses
+      data2[("stress", "S11")] = data2.forces.F1 / data2.areas.A1
+      data2[("stress", "S22")] = data2.forces.F2 / data2.areas.A2
+      data2[("stress", "S33")] = data2.forces.F3 / data2.areas.A3
+      # Strains
+      L1 = data2.dimensions.L1.values[0]
+      L2 = data2.dimensions.L2.values[0]
+      L3 = data2.dimensions.L3.values[0]
+      data2[("strains", "E11")] = data2.disp.U1 / L1
+      data2[("strains", "E22")] = data2.disp.U2 / L2
+      data2[("strains", "E33")] = data2.disp.U3 / L3
+      data2[("strains", "LE11")]  = np.log(1. + data2.strains.E11)
+      data2[("strains", "LE22")]  = np.log(1. + data2.strains.E22)
+      data2[("strains", "LE33")]  = np.log(1. + data2.strains.E33)
+      # Last modifications
+      data2.index.name = "frame"
+      self.data["history"] = data2.sort_index(axis = 1)
+     
          
 ################################################################################
 # PARTS
