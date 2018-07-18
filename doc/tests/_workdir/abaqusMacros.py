@@ -1128,3 +1128,8 @@ def Macro5():
     session.viewports['Viewport: 1'].setValues(displayedObject=o1)
     session.odbs['/home/lcharleux/Documents/Programmation/Python/Modules/compmod2/doc/tests/_workdir/RVE.odb'].close(
         )
+    o1 = session.openOdb(
+        name='/home/lcharleux/Documents/Programmation/Python/Modules/compmod2/doc/tests/_workdir/RVE.odb')
+    session.viewports['Viewport: 1'].setValues(displayedObject=o1)
+
+

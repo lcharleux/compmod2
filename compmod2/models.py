@@ -26,22 +26,6 @@ class RVETest(argiope.models.Model, argiope.utils.Container):
     Writes the input file in the chosen format.
     """
     main_template = open(MODPATH + "/templates/models/RVETest/main_input.inp").read()
-    step_template = open(MODPATH + "/templates/models/RVETest/step.inp").read()
-    """
-    E = 1.
-    nu = .3
-    dist = compmod2.distributions.Weibull(k = 1., l = 1.e-2)
-    xt, x = dist.discretize(Ne, xmax = 1.)
-    np.random.shuffle(x)
-    materials = [argiope.materials.ElasticPerfectlyPlastic(
-                                     label = "mat{0}".format(i+1), 
-                                     young_modulus = E, 
-                                     poisson_ratio = nu, 
-                                     yield_stress = x[i] * E) 
-                                     for i in range(Ne)]
-    
-    sample = compmod2.models.RVE(shape = shape)
-    """
     # MESH
     sample = self.parts["sample"]
     if sample.mesh == None: sample.make_mesh()
@@ -49,14 +33,10 @@ class RVETest(argiope.models.Model, argiope.utils.Container):
     n = m.nodes
     c = n.coords
     xm, ym, zm = c.max(axis = 0)
-    shape = np.array(sample.shape)
-    Ne = shape.prod()
+    Ne = m.elements.shape[0]
     # MATERIALS & ELEMENTS
     materials = self.materials
-    #m.elements.materials = ["mat{0}".format(i) for i in m.elements.index]
-    #m.elements.loc[:, ("type", "solver", "") ] = "C3D8"
-    
-    
+       
     # GENERAL PURPOSE ORDERED SETS
     n[("sets", "left")]      = (c.x == 0.) 
     n[("sets", "right")]     = (c.x == xm) 
@@ -65,14 +45,11 @@ class RVETest(argiope.models.Model, argiope.utils.Container):
     n[("sets", "back")]      = (c.z == 0.) 
     n[("sets", "front")]     = (c.z == zm) 
     n[("sets", "pinned")]    = n.sets.left & n.sets.bottom & n.sets.back  
-    
     control_node = n.index.max() + 1
     m.nodes.loc[control_node, [("coords")]] = xm, ym, zm
     m.nodes.loc[control_node,"sets"] = False
     m.nodes[("sets", "control")] = False
     m.nodes.loc[control_node, ("sets", "control")] = True
-    
-    
     
     # BOUNDARY CONDITIONS
     bc_type = "periodic" # TEST
@@ -211,7 +188,54 @@ class RVETest(argiope.models.Model, argiope.utils.Container):
       # Last modifications
       data2.index.name = "frame"
       self.data["history"] = data2.sort_index(axis = 1)
-     
+    # FIELD OUTPUTS
+    sample = self.parts["sample"]
+    files = os.listdir(self.workdir + "reports/")
+    files = [f for f in files if f.endswith(".frpt")]
+    files.sort()
+    for path in files:
+      field = argiope.abq.pypostproc.read_field_report(
+                         self.workdir + "reports/" + path)
+      self.parts["sample"].mesh.fields.append(field)
+  
+  def get_Poly3DCollection(self, deformed = True, step_label = None, frame = -1, displacement_factor = 1.,
+                        surface_labels = ("back", "front", "left", "right", "bottom", "top")):
+    """
+    Returns a matplotlib Poly3DCollection
+    """
+    # MODEL SETUP
+    m = self.parts["sample"].mesh
+    for s in surface_labels: m.node_set_to_surface(s)
+    surfdic = {}
+    surfaces = m.elements.surfaces
+    for surface_label in surface_labels:
+        df =  surfaces[surface_label]
+        df.columns = range(len(df.columns))
+        surfdic[surface_label] = df.stack()
+    
+    # MESH SETUP
+    m2 = m.copy()
+    m2.nodes.sort_index(inplace = True)
+    
+    # FIELDS SETUP
+    fdata = self.parts["sample"].mesh.fields_metadata()
+    fields = self.parts["sample"].mesh.fields
+    if step_label != None:
+        U_id = fdata[(fdata.step_label == step_label) 
+            & (fdata.label == "U")].sort_values("frame").index[frame]
+        U = fields[U_id]
+        if deformed:
+            U.data.sort_index(inplace = True)
+            m2.nodes.coords += U.data.values * displacement_factor
+    faces = m2.split("faces", at = "coords").unstack()
+    vertices, element_map = [], []
+    for label in surfdic.keys():
+        surf = faces.loc[surfdic[label].values].stack()
+        for key, data in surf.groupby(("element", "faces")):
+            element, face = key    
+            vertices.append(data.values)
+            element_map.append(element)
+    return vertices, element_map        
          
 ################################################################################
 # PARTS

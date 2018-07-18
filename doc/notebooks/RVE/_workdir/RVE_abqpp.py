@@ -83,5 +83,58 @@ if job_completed:
   session.writeXYReport(fileName="reports/" + simName + "_hist.hrpt", 
                         xyData = histData + [session.xyDataObjects['volume']] )
 
- 
+  # 3: Field outputs
+  instances = ("ISAMPLE",)
+  fields = {"S": {"abq": (('S', INTEGRATION_POINT, 
+                              ((COMPONENT, 'S11'),  
+                               (COMPONENT, 'S22'), 
+                               (COMPONENT, 'S33'), 
+                               (COMPONENT, 'S12'), 
+                               (COMPONENT, 'S13'), 
+                               (COMPONENT, 'S23'), 
+                          )),),
+                  "argiope": {"class": "Tensor6Field"},
+                  "output_position": ELEMENT_CENTROID,
+                  } , 
+            "LE": {"abq": (('LE', INTEGRATION_POINT, 
+                              ((COMPONENT, 'LE11'),  
+                               (COMPONENT, 'LE22'), 
+                               (COMPONENT, 'LE33'), 
+                               (COMPONENT, 'LE12'), 
+                               (COMPONENT, 'LE13'), 
+                               (COMPONENT, 'LE23'), 
+                          )),),
+                  "argiope": {"class": "Tensor6Field"},
+                  "output_position": ELEMENT_CENTROID,
+                  } ,       
+            "U":  {"abq": (('U', NODAL, 
+                          ((COMPONENT, 'U1'),  
+                           (COMPONENT, 'U2'), 
+                           (COMPONENT, 'U3'),                 
+                           )),),
+                   "argiope": {"class": "Vector3Field"},
+                   "output_position": NODAL,        
+                  }          
+           }
+  for instance in instances:
+    for stepNum in xrange(len(stepKeys)):
+      stepKey = stepKeys[stepNum]
+      for fieldKey in fields.keys():
+        for frameNum in range(len(odb.steps[stepKeys[stepNum]].frames)):
+          path = ("reports/{0}_instance-{1}_step-{2}_frame-{3}_var-{4}.frpt"
+                     .format(
+                        simName,
+                        instance,     
+                        stepNum,
+                        frameNum,
+                        fieldKey,))
+          abqpostproc.write_field_report(odb = odb,
+                                         path = path,
+                                         label = fieldKey,
+                                         argiope_class = fields[fieldKey]["argiope"]["class"],
+                                         variable = fields[fieldKey]["abq"],
+                                         instance = instance,
+                                         output_position = fields[fieldKey]["output_position"],
+                                         step = stepNum,
+                                         frame = frameNum)
 
