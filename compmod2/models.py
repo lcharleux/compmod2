@@ -189,6 +189,11 @@ class RVETest(argiope.models.Model, argiope.utils.Container):
       data2[("strains", "LE11")]  = np.log(1. + data2.strains.E11)
       data2[("strains", "LE22")]  = np.log(1. + data2.strains.E22)
       data2[("strains", "LE33")]  = np.log(1. + data2.strains.E33)
+      # Energies
+      data2[("energies", "Wtot")] = data.Wtot
+      data2[("energies", "We")] = data.We
+      data2[("energies", "Wp")] = data.Wp
+      
       # Last modifications
       data2.index.name = "frame"
       self.data["history"] = data2.sort_index(axis = 1)
