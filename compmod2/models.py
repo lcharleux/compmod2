@@ -58,15 +58,19 @@ class RVETest(argiope.models.Model, argiope.utils.Container):
         faces = {"uleft"   : n.coords[n.sets.left  ].sort_values(["y", "z"]),
                  "uright"  : n.coords[n.sets.right ].sort_values(["y", "z"]),    
                  "ubottom" : n.coords[n.sets.bottom 
-                         & (n.sets.right == False)  ].sort_values(["x", "z"]),
+                          & (n.sets.right == False)
+                          ].sort_values(["x", "z"]),
                  "utop"    : n.coords[n.sets.top   
-                         & (n.sets.right == False)  ].sort_values(["x", "z"]),
+                          & (n.sets.right == False)
+                          ].sort_values(["x", "z"]),
                  "uback"   : n.coords[n.sets.back  
-                         & (n.sets.right == False)
-                         & (n.sets.top == False)].sort_values(["x", "y"]),                   
+                          & (n.sets.right == False)
+                          & (n.sets.top   == False)
+                          ].sort_values(["x", "y"]),
                  "ufront"  : n.coords[n.sets.front 
-                         & (n.sets.right == False)
-                         & (n.sets.top == False)].sort_values(["x", "y"])}
+                          & (n.sets.right == False)
+                          & (n.sets.top   == False)
+                          ].sort_values(["x", "y"])}
         bc = "\n".join([argiope.utils._unsorted_set(v, k) 
                         for k, v in faces.items()]) + "\n"
     
