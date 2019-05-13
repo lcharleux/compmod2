@@ -1,0 +1,12 @@
+$title
+$underline
+
+$files
+
+
+Table of contents:
+
+.. toctree::
+   :maxdepth: 2
+
+

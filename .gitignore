@@ -12,4 +12,6 @@
 *.rpy.*
 *.deps
 *.hrpt
-
+*/.ipynb_checkpoints/*
+doc/notebooks_rst/*
+doc/_build/*
