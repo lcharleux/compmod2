@@ -1,7 +1,7 @@
 .. index.rst
 
-Scientific Python
-+++++++++++++++++++++++++++++++++++++++++++++++
+CompMod2: Compartmentalized models with Argiope
+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 
