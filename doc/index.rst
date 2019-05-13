@@ -5,7 +5,6 @@ CompMod2: Compartmentalized models with Argiope
 
 
 
-
   
 Table of contents
 ---------------------
