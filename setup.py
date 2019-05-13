@@ -1,8 +1,8 @@
 from setuptools import setup
 
 setup(name='compmod2',
-      version='0.0',
-      description="Compartmentalized models",
+      version='0.1',
+      description="Compartmentalized models with Argiope",
       long_description="",
       author='Ludovic Charleux',
       author_email='ludovic.charleux@univ-smb.fr',
@@ -13,7 +13,7 @@ setup(name='compmod2',
           "numpy",
           "scipy",
           "matplotlib",
-          "pandas"
-          "argiope"
+          "pandas",
+          "argiope",
           ],
       )
