@@ -1,7 +1,7 @@
 *METADATA
 label=EE
 argiope_class=Tensor6Field
-odb=/home/lcharleux/Documents/Programmation/Python/Modules/compmod2/doc/notebooks/RVE/_workdir/RVE.odb
+odb=/home/ludch/Documents/Programmation/Python/Modules/compmod2/doc/notebooks/RVE/_workdir/RVE.odb
 instance=ISAMPLE
 position=ELEMENT_CENTROID
 step_num=0

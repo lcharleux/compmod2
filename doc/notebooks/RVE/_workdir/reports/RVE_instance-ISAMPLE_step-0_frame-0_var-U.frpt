@@ -1,7 +1,7 @@
 *METADATA
 label=U
 argiope_class=Vector3Field
-odb=/home/lcharleux/Documents/Programmation/Python/Modules/compmod2/doc/notebooks/RVE/_workdir/RVE.odb
+odb=/home/ludch/Documents/Programmation/Python/Modules/compmod2/doc/notebooks/RVE/_workdir/RVE.odb
 instance=ISAMPLE
 position=NODAL
 step_num=0

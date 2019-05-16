@@ -240,12 +240,12 @@ class RVETest(argiope.models.Model, argiope.utils.Container):
     vertices, element_map = [], []
     for label in surfdic.keys():
         surf = faces.loc[surfdic[label].values].stack()
-        for key, data in surf.groupby(("element", "faces")):
+        for key, value  in surf.reset_index().groupby(by = ["element", "faces"]):
             element, face = key    
-            vertices.append(data.values)
+            vertices.append(value[["x", "y", "z"]].values)
             element_map.append(element)
     return vertices, element_map        
-         
+      
 ################################################################################
 # PARTS
 ################################################################################  
