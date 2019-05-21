@@ -172,9 +172,18 @@ class RVETest(argiope.models.Model, argiope.utils.Container):
       data2[("areas", "A2")] = data2.volume.V / data2.dimensions.L2
       data2[("areas", "A3")] = data2.volume.V / data2.dimensions.L3
       # Forces
-      data2[("forces", "F1")] = data2.forces.CF1 + data2.forces.RF1
-      data2[("forces", "F2")] = data2.forces.CF2 + data2.forces.RF2
-      data2[("forces", "F3")] = data2.forces.CF3 + data2.forces.RF3
+      for i in range(1,4):
+        temp = pd.DataFrame(index = data2.index)
+        temp["step"] = data2.step.s  
+        for s in range(len(self.steps)):
+            step = self.steps[s]
+            if step.cx[0] ==  "free":
+                temp.loc[temp.step == s, "F"] = 0.
+            if step.cx[0] ==  "disp":
+                temp.loc[temp.step == s, "F"] = data.loc[data.step == s, "Rf{0}".format(i)]  
+            if step.cx[0] ==  "force":
+                temp.loc[temp.step == s, "F"] = data.loc[data.step == s, "Cf{0}".format(i)]     
+        data2[("forces", "F{0}".format(i))] = temp.F
       # Stresses
       data2[("stress", "S11")] = data2.forces.F1 / data2.areas.A1
       data2[("stress", "S22")] = data2.forces.F2 / data2.areas.A2
