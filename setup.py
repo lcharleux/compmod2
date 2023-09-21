@@ -16,4 +16,6 @@ setup(name='compmod2',
           "pandas",
           "argiope",
           ],
+      package_data={'compmod2': ['templates\models\RVETest\*.inp', 'templates\models\RVETest\*.py']},
+      include_package_data=True,
       )
